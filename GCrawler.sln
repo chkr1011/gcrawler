@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GCrawler", "GCrawler\GCrawler.csproj", "{34E9CCE6-77D4-4E3C-B00A-8465968AC2FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PiVi", "PiVi\PiVi.csproj", "{D07C617E-D2B2-4975-801C-65F99FBE8DDA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{34E9CCE6-77D4-4E3C-B00A-8465968AC2FE}.Debug|x86.ActiveCfg = Debug|x86
+		{34E9CCE6-77D4-4E3C-B00A-8465968AC2FE}.Debug|x86.Build.0 = Debug|x86
+		{34E9CCE6-77D4-4E3C-B00A-8465968AC2FE}.Release|x86.ActiveCfg = Release|x86
+		{34E9CCE6-77D4-4E3C-B00A-8465968AC2FE}.Release|x86.Build.0 = Release|x86
+		{D07C617E-D2B2-4975-801C-65F99FBE8DDA}.Debug|x86.ActiveCfg = Debug|x86
+		{D07C617E-D2B2-4975-801C-65F99FBE8DDA}.Debug|x86.Build.0 = Debug|x86
+		{D07C617E-D2B2-4975-801C-65F99FBE8DDA}.Release|x86.ActiveCfg = Release|x86
+		{D07C617E-D2B2-4975-801C-65F99FBE8DDA}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
