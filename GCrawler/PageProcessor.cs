@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace GCrawler
         private readonly Regex _hrefAttributeRegex;
 
         private readonly List<PageRequest> _requests = new List<PageRequest>();
-        private readonly List<string> _blockedSources = new List<string>();
+        private readonly HashSet<string> _blockedSources = new HashSet<string>();
         private readonly List<Task> _workerTasks = new List<Task>();
 
         private readonly List<string> _excludingUriPaths = new List<string>(); 
@@ -39,19 +40,24 @@ namespace GCrawler
 
         private List<Uri> ExtractItemSources(Page page)
         {
-            List<Uri> sources = ExtractSources(
+            HashSet<Uri> srcAttributeSources = ExtractSources(
                 page,
                 _imgTagRegex,
                 _srcAttributeRegex,
                 source => source.EndsWith(".gif", StringComparison.OrdinalIgnoreCase));
 
-            sources.AddRange(ExtractSources(
+            var hrefAttributeSources = ExtractSources(
                 page,
                 _aTagRegex,
                 _hrefAttributeRegex,
-                source => source.EndsWith(".gif", StringComparison.OrdinalIgnoreCase)));
-    
-            return sources;
+                source => source.EndsWith(".gif", StringComparison.OrdinalIgnoreCase));
+
+            foreach (var otherSource in hrefAttributeSources)
+            {
+                srcAttributeSources.Add(otherSource);
+            }
+
+            return srcAttributeSources.ToList();
         }
 
         private List<Uri> ExtractPageSources(Page page)
@@ -60,18 +66,9 @@ namespace GCrawler
                 page,
                 _aTagRegex,
                 _hrefAttributeRegex,
-                delegate(string source)
-                    {
-                        foreach (string excludingUriPath in this._excludingUriPaths)
-                        {
-                            if (source.StartsWith(excludingUriPath, StringComparison.OrdinalIgnoreCase))
-                            {
-                                return false;
-                            }
-                        }
-
-                        return true;
-                    });
+                source =>
+                    _excludingUriPaths.All(
+                        excludingUriPath => !source.StartsWith(excludingUriPath, StringComparison.OrdinalIgnoreCase))).ToList();
         }
 
         public void QueueSource(Uri source)
@@ -114,7 +111,7 @@ namespace GCrawler
 
                 foreach (PageRequest request in requests)
                 {
-                    if (request.Hops.Count > 5)
+                    if (request.Hops.Count > Properties.Settings.Default.MaxPageHops)
                     {
                         Tracer.WriteHint("Excluded page ({0}) because it reaches the max hops count.", request.Source);
                         continue;
@@ -126,7 +123,10 @@ namespace GCrawler
                         Page page = ContentDownloader.DownloadPage(request.Source);
 
                         List<Uri> itemSources = ExtractItemSources(page);
-                        Tracer.WriteVerbose("Extraced {0} items sources from page '{1}'.", itemSources.Count, page.Source);
+                        if (itemSources.Count > 0)
+                        {
+                            Tracer.WriteVerbose("Extraced {0} item sources from page '{1}'.", itemSources.Count, page.Source);
+                        }
 
                         List<Uri> subPageSources = ExtractPageSources(page);
                         
@@ -169,9 +169,9 @@ namespace GCrawler
             }
         }
 
-        private List<Uri> ExtractSources(Page page, Regex tagRegex, Regex attributeRegex, Func<string, bool> onCheckSource = null)
+        private HashSet<Uri> ExtractSources(Page page, Regex tagRegex, Regex attributeRegex, Func<string, bool> onCheckSource = null)
         {
-            var sources = new List<Uri>();
+            var sources = new HashSet<Uri>();
             foreach (Match tagMatch in tagRegex.Matches(page.Content))
             {
                 Match attributeMatch = attributeRegex.Match(tagMatch.Value);

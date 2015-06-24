@@ -14,7 +14,7 @@ namespace GCrawler
         private readonly int _minFramesCount = 5;
 
         private readonly List<Uri> _sources = new List<Uri>();
-        private readonly List<string> _blockedSources = new List<string>();
+        private readonly HashSet<string> _blockedSources = new HashSet<string>();
         private readonly List<Task> _workerTasks = new List<Task>();
 
         public ItemProcessor()

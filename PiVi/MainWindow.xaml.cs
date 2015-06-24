@@ -1,11 +1,13 @@
-﻿namespace PiVi
-{
-    using System;
-    using System.ComponentModel;
-    using System.Drawing;
-    using System.IO;
-    using System.Windows.Input;
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
+using System.Windows.Input;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
+namespace PiVi
+{
     public partial class MainWindow
     {
         private readonly MemoryStream _selectedImageStream = new MemoryStream();
@@ -14,11 +16,11 @@
 
         public MainWindow()
         {
-            this.InitializeComponent();
-            this.Loaded += delegate { this._buttonNextImage.Focus(); };
+            InitializeComponent();
+            Loaded += delegate { this._buttonNextImage.Focus(); };
 
-            this.DataContext = this._vm;
-            this._vm.PropertyChanged += this.OnVMPropertyChanged;
+            DataContext = _vm;
+            _vm.PropertyChanged += OnVMPropertyChanged;
         }
 
         private void OnVMPropertyChanged(object sender, PropertyChangedEventArgs eventArgs)
@@ -28,34 +30,34 @@
                 return;
             }
 
-            byte[] buffer = File.ReadAllBytes(this._vm.SelectedImage.Filename);
-            this._selectedImageStream.SetLength(0);
-            this._selectedImageStream.Write(buffer, 0, buffer.Length);
+            byte[] buffer = File.ReadAllBytes(_vm.SelectedImage.Filename);
+            _selectedImageStream.SetLength(0);
+            _selectedImageStream.Write(buffer, 0, buffer.Length);
             
-            if (this._imageInstance != null)
+            if (_imageInstance != null)
             {
-                this._imageInstance.Dispose();
+                _imageInstance.Dispose();
             }
 
-            this._imageInstance = System.Drawing.Image.FromStream(this._selectedImageStream);
-            this._pictureBox.Image = this._imageInstance;
+            _imageInstance = Image.FromStream(_selectedImageStream);
+            _pictureBox.Image = _imageInstance;
         }
 
         private void OnPreviewKeyDown(object sender, KeyEventArgs eventArgs)
         {
             if (eventArgs.Key == Key.Right)
             {
-                this._vm.CommandShowNextImage.Execute(null);
+                _vm.CommandShowNextImage.Execute(null);
                 eventArgs.Handled = true;
             }
             else if (eventArgs.Key == Key.Left)
             {
-                this._vm.CommandShowPreviousImage.Execute(null);
+                _vm.CommandShowPreviousImage.Execute(null);
                 eventArgs.Handled = true;
             }
             else if (eventArgs.Key == Key.Delete)
             {
-                this._vm.CommandDeleteSelectedImage.Execute(null);
+                _vm.CommandDeleteSelectedImage.Execute(null);
                 eventArgs.Handled = true;
             }
             else if (eventArgs.Key == Key.Escape)
@@ -64,16 +66,16 @@
             }
         }
 
-        private void OnChooseFolderMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void OnChooseFolderMouseDown(object sender, MouseButtonEventArgs e)
         {
-            using (var folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog())
+            using (var folderBrowserDialog = new FolderBrowserDialog())
             {
                 if (folderBrowserDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                 {
                     return;
                 }
 
-                this._vm.SetImageLocation(folderBrowserDialog.SelectedPath);
+                _vm.SetImageLocation(folderBrowserDialog.SelectedPath);
             }
         }
     }

@@ -1,9 +1,9 @@
-﻿namespace PiVi
-{
-    using System.Collections.ObjectModel;
-    using System.IO;
-    using System.Windows.Input;
+﻿using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows.Input;
 
+namespace PiVi
+{
     internal sealed class MainWindowViewModel : BaseViewModel
     {
         private readonly RelayCommand _commandShowNextImage;
@@ -16,16 +16,16 @@
         
         public MainWindowViewModel()
         {
-            this._commandShowNextImage = new RelayCommand(this.ShowNextImgage);
-            this._commandShowPreviousImage = new RelayCommand(this.ShowPreviousImage);
-            this._commandDeleteSelectedImage = new RelayCommand(this.DeleteSelectedImage);
+            _commandShowNextImage = new RelayCommand(ShowNextImgage);
+            _commandShowPreviousImage = new RelayCommand(ShowPreviousImage);
+            _commandDeleteSelectedImage = new RelayCommand(DeleteSelectedImage);
         }
 
         public ICommand CommandShowNextImage
         {
             get
             {
-                return this._commandShowNextImage;
+                return _commandShowNextImage;
             }
         }
 
@@ -33,7 +33,7 @@
         {
             get
             {
-                return this._commandShowPreviousImage;
+                return _commandShowPreviousImage;
             }
         }
 
@@ -41,7 +41,7 @@
         {
             get
             {
-                return this._commandDeleteSelectedImage;
+                return _commandDeleteSelectedImage;
             }
         }
 
@@ -49,13 +49,13 @@
         {
             get
             {
-                return this._selectedImage;
+                return _selectedImage;
             }
 
             set
             {
-                this._selectedImage = value;
-                this.OnPropertyChanged(() => this.SelectedImage);
+                _selectedImage = value;
+                OnPropertyChanged(() => SelectedImage);
             }
         }
 
@@ -63,13 +63,13 @@
         {
             get
             {
-                return this._imageIndex;
+                return _imageIndex;
             }
 
             set
             {
-                this._imageIndex = value;
-                this.OnPropertyChanged(() => this.SelectedImageIndex);
+                _imageIndex = value;
+                OnPropertyChanged(() => SelectedImageIndex);
             }
         }
 
@@ -77,61 +77,61 @@
         {
             get
             {
-                return this._imageFiles;
+                return _imageFiles;
             }
         }
 
         private void ShowNextImgage()
         {
-            this.SelectedImageIndex++;
-            if (this.SelectedImageIndex > this._imageFiles.Count - 1)
+            SelectedImageIndex++;
+            if (SelectedImageIndex > _imageFiles.Count - 1)
             {
-                this.SelectedImageIndex = 0;
+                SelectedImageIndex = 0;
             }
 
-            this.UpdateSelectedImage();
+            UpdateSelectedImage();
         }
 
         private void DeleteSelectedImage()
         {
-            if (this._selectedImage == null)
+            if (_selectedImage == null)
             {
                 return;
             }
 
-            File.Delete(this.SelectedImage.Filename);
-            this._imageFiles.RemoveAt(this._imageIndex);
+            File.Delete(SelectedImage.Filename);
+            _imageFiles.RemoveAt(_imageIndex);
 
-            this.UpdateSelectedImage();
+            UpdateSelectedImage();
         }
 
         private void ShowPreviousImage()
         {
-            this.SelectedImageIndex--;
-            if (this.SelectedImageIndex < 0)
+            SelectedImageIndex--;
+            if (SelectedImageIndex < 0)
             {
-                this.SelectedImageIndex = this._imageFiles.Count - 1;
+                SelectedImageIndex = _imageFiles.Count - 1;
             }
 
-            this.UpdateSelectedImage();   
+            UpdateSelectedImage();   
         }
 
         private void UpdateSelectedImage()
         {
-            if (this._imageFiles.Count == 0)
+            if (_imageFiles.Count == 0)
             {
-                this._imageIndex = 0;
-                this.SelectedImage = null;
+                _imageIndex = 0;
+                SelectedImage = null;
                 return;
             }
 
-            var image = new ImageDescription(this._imageFiles[this._imageIndex]);
-            this.SelectedImage = image;
+            var image = new ImageDescription(_imageFiles[_imageIndex]);
+            SelectedImage = image;
         }
 
         public void SetImageLocation(string selectedPath)
         {
-            this._imageFiles.Clear();
+            _imageFiles.Clear();
 
             foreach (string file in Directory.GetFiles(selectedPath, "*", SearchOption.AllDirectories))
             {
@@ -140,10 +140,10 @@
                     continue;
                 }
 
-                this._imageFiles.Add(file);
+                _imageFiles.Add(file);
             }
 
-            this.UpdateSelectedImage();
+            UpdateSelectedImage();
         }
     }
 }

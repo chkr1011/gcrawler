@@ -1,32 +1,17 @@
-﻿namespace PiVi
+﻿using System.IO;
+
+namespace PiVi
 {
-    using System.IO;
-
-    internal class ImageDescription
+    internal sealed class ImageDescription
     {
-        private readonly string _filename;
-        private readonly FileInfo _fileInfo;
-
         public ImageDescription(string filename)
         {
-            this._filename = filename;
-            this._fileInfo = new FileInfo(filename);
+            Filename = filename;
+            FileInfo = new FileInfo(filename);
         }
 
-        public string Filename
-        {
-            get
-            {
-                return this._filename;
-            }
-        }
+        public string Filename { get; private set; }
 
-        public FileInfo FileInfo
-        {
-            get
-            {
-                return this._fileInfo;
-            }
-        }
+        public FileInfo FileInfo { get; private set; }
     }
 }
