@@ -1,20 +1,23 @@
-﻿namespace GCrawler
-{
-    using System;
-    using System.Threading;
+﻿using System;
+using System.Threading;
 
+namespace GCrawler
+{
     public static class Program
     {
-        private static readonly PageProcessor _pageProcessor = new PageProcessor();
-        private static readonly ItemProcessor _itemProcessor = new ItemProcessor();
+        private static readonly PageProcessor PageProcessor = new PageProcessor();
+        private static readonly ItemProcessor ItemProcessor = new ItemProcessor();
 
         private static void Main()
         {
             Tracer.WriteInformation("Application started.");
 
-            Program._pageProcessor.NewItemSourcesAvailable += sources => Program._itemProcessor.QueueItems(sources);
+            PageProcessor.NewItemSourcesAvailable += sources => ItemProcessor.QueueItems(sources);
 
-            Program._pageProcessor.QueueSource(new Uri("http://www.gifbin.com/"));
+            foreach (var page in Properties.Settings.Default.Pages)
+            {
+                PageProcessor.QueueSource(new Uri(page));
+            }
             
             Thread.Sleep(Timeout.Infinite);
         }

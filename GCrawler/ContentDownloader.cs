@@ -1,12 +1,12 @@
-﻿namespace GCrawler
-{
-    using System;
-    using System.IO;
-    using System.Net;
+﻿using System;
+using System.IO;
+using System.Net;
 
+namespace GCrawler
+{
     internal static class ContentDownloader
     {
-        private static readonly WebClient _webClient = new WebClient();
+        ////private static readonly WebClient _webClient = new WebClient();
 
         public static Page DownloadPage(Uri source)
         {

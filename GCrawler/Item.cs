@@ -1,32 +1,17 @@
-﻿namespace GCrawler
-{
-    using System;
+﻿using System;
 
+namespace GCrawler
+{
     internal sealed class Item
     {
-        private readonly Uri _source;
-        private readonly string _tempFilename;
-
         public Item(Uri source, string tempFilename)
         {
-            this._source = source;
-            this._tempFilename = tempFilename;
+            Source = source;
+            TempFilename = tempFilename;
         }
 
-        public Uri Source
-        {
-            get
-            {
-                return this._source;
-            }
-        }
+        public Uri Source { get; private set; }
 
-        public string TempFilename
-        {
-            get
-            {
-                return this._tempFilename;
-            }
-        }
+        public string TempFilename { get; private set; }
     }
 }

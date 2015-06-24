@@ -1,13 +1,13 @@
-﻿namespace GCrawler
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.IO;
-    using System.Threading;
-    using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
+namespace GCrawler
+{
     internal sealed class ItemProcessor
     {
         private readonly Size _minSize = new Size(64, 64);
@@ -21,29 +21,29 @@
         {
             for (int taskCount = 0; taskCount < 3; taskCount++)
             {
-                var task = new Task(this.ProcessSources, TaskCreationOptions.LongRunning);
+                var task = new Task(ProcessSources, TaskCreationOptions.LongRunning);
                 task.Start();
 
-                this._workerTasks.Add(task);
+                _workerTasks.Add(task);
             }
         }
 
         public void QueueItems(IEnumerable<Uri> sources)
         {
-            lock (this._sources)
+            lock (_sources)
             {
                 foreach (Uri source in sources)
                 {
                     string sourceText = source.OriginalString.ToLower();
 
-                    if (this._blockedSources.Contains(sourceText))
+                    if (_blockedSources.Contains(sourceText))
                     {
                         Tracer.WriteVerbose("Skipped item '{0}' because it has already been processed.", source);
                         continue;
                     }
 
-                    this._sources.Add(source);
-                    this._blockedSources.Add(sourceText);
+                    _sources.Add(source);
+                    _blockedSources.Add(sourceText);
 
                     Tracer.WriteVerbose("Added item ({0}) to the item processing queue.", source);
                 }
@@ -55,10 +55,10 @@
             while (true)
             {
                 var itemsToLoad = new List<Uri>();
-                lock (this._sources)
+                lock (_sources)
                 {
-                    itemsToLoad.AddRange(this._sources);
-                    this._sources.Clear();
+                    itemsToLoad.AddRange(_sources);
+                    _sources.Clear();
                 }
 
                 if (itemsToLoad.Count == 0)
@@ -72,7 +72,7 @@
                     {
                         Tracer.WriteVerbose("Initiated download of item from ({0}).", itemSource);
                         Item item = ContentDownloader.DownloadItem(itemSource);
-                        this.OnItemDownloaded(item);
+                        OnItemDownloaded(item);
                     }
                     catch (Exception exception)
                     {
@@ -94,7 +94,7 @@
                         return false;
                     }
 
-                    if (image.Size.Width < this._minSize.Width || image.Size.Height < this._minSize.Height)
+                    if (image.Size.Width < _minSize.Width || image.Size.Height < _minSize.Height)
                     {
                         Tracer.WriteVerbose("Item from '{0}' is too small.", item.Source);
                         return false;
@@ -106,7 +106,7 @@
                         return false;
                     }
 
-                    if (image.GetFrameCount(new FrameDimension(image.FrameDimensionsList[0])) < this._minFramesCount)
+                    if (image.GetFrameCount(new FrameDimension(image.FrameDimensionsList[0])) < _minFramesCount)
                     {
                         Tracer.WriteVerbose("Item from '{0}' is not animated.", item.Source);
                         return false;
@@ -124,7 +124,7 @@
 
         private void OnItemDownloaded(Item item)
         {
-            if (this.ValidateItem(item))
+            if (ValidateItem(item))
             {
                 ContentManager.SaveContent(item, item.Source);
             }

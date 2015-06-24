@@ -1,11 +1,11 @@
-﻿namespace GCrawler
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Text.RegularExpressions;
-    using System.Threading;
-    using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
+namespace GCrawler
+{
     internal sealed class PageProcessor
     {
         private readonly Regex _imgTagRegex;
@@ -21,17 +21,17 @@
 
         public PageProcessor()
         {
-            this._imgTagRegex = this.GenerateRegExForTag("img");
-            this._srcAttributeRegex = this.GenerateRegExForAttribute("src");
-            this._aTagRegex = this.GenerateRegExForTag("a");
-            this._hrefAttributeRegex = this.GenerateRegExForAttribute("href");
+            _imgTagRegex = GenerateRegExForTag("img");
+            _srcAttributeRegex = GenerateRegExForAttribute("src");
+            _aTagRegex = GenerateRegExForTag("a");
+            _hrefAttributeRegex = GenerateRegExForAttribute("href");
             
             for (int taskCount = 0; taskCount < 10; taskCount++)
             {
-                var task = new Task(this.ProcessSources, TaskCreationOptions.LongRunning);
+                var task = new Task(ProcessSources, TaskCreationOptions.LongRunning);
                 task.Start();
 
-                this._workerTasks.Add(task);
+                _workerTasks.Add(task);
             }
         }
 
@@ -39,32 +39,32 @@
 
         private List<Uri> ExtractItemSources(Page page)
         {
-            List<Uri> sources = this.ExtractSources(
+            List<Uri> sources = ExtractSources(
                 page,
-                this._imgTagRegex,
-                this._srcAttributeRegex,
-                source => source.EndsWith(".gif", StringComparison.CurrentCultureIgnoreCase));
+                _imgTagRegex,
+                _srcAttributeRegex,
+                source => source.EndsWith(".gif", StringComparison.OrdinalIgnoreCase));
 
-            sources.AddRange(this.ExtractSources(
+            sources.AddRange(ExtractSources(
                 page,
-                this._aTagRegex,
-                this._hrefAttributeRegex,
-                source => source.EndsWith(".gif", StringComparison.CurrentCultureIgnoreCase)));
+                _aTagRegex,
+                _hrefAttributeRegex,
+                source => source.EndsWith(".gif", StringComparison.OrdinalIgnoreCase)));
     
             return sources;
         }
 
         private List<Uri> ExtractPageSources(Page page)
         {
-            return this.ExtractSources(
+            return ExtractSources(
                 page,
-                this._aTagRegex,
-                this._hrefAttributeRegex,
+                _aTagRegex,
+                _hrefAttributeRegex,
                 delegate(string source)
                     {
                         foreach (string excludingUriPath in this._excludingUriPaths)
                         {
-                            if (source.StartsWith(excludingUriPath, StringComparison.InvariantCultureIgnoreCase))
+                            if (source.StartsWith(excludingUriPath, StringComparison.OrdinalIgnoreCase))
                             {
                                 return false;
                             }
@@ -76,16 +76,16 @@
 
         public void QueueSource(Uri source)
         {
-            lock (this._requests)
+            lock (_requests)
             {
-                if (this._blockedSources.Contains(source.OriginalString.ToLower()))
+                if (_blockedSources.Contains(source.OriginalString.ToLower()))
                 {
                     Tracer.WriteHint("Skipping add of source '{0}' because it is already scanned.", source);
                     return;
                 }
 
-                this._requests.Add(new PageRequest(source));
-                this._blockedSources.Add(source.OriginalString.ToLower());
+                _requests.Add(new PageRequest(source));
+                _blockedSources.Add(source.OriginalString.ToLower());
                 Tracer.WriteHint("Added manual source '{0}'.", source);
             }
         }
@@ -95,16 +95,16 @@
             while (true)
             {
                 var requests = new List<PageRequest>();
-                lock (this._requests)
+                lock (_requests)
                 {
                     int range = 25;
-                    if (range > this._requests.Count)
+                    if (range > _requests.Count)
                     {
-                        range = this._requests.Count;
+                        range = _requests.Count;
                     }
 
-                    requests.AddRange(this._requests.GetRange(0, range));
-                    this._requests.RemoveRange(0, range);
+                    requests.AddRange(_requests.GetRange(0, range));
+                    _requests.RemoveRange(0, range);
                 }
 
                 if (requests.Count == 0)
@@ -125,10 +125,10 @@
                         Tracer.WriteVerbose("Initiated download of page ({0}).", request.Source);
                         Page page = ContentDownloader.DownloadPage(request.Source);
 
-                        List<Uri> itemSources = this.ExtractItemSources(page);
+                        List<Uri> itemSources = ExtractItemSources(page);
                         Tracer.WriteVerbose("Extraced {0} items sources from page '{1}'.", itemSources.Count, page.Source);
 
-                        List<Uri> subPageSources = this.ExtractPageSources(page);
+                        List<Uri> subPageSources = ExtractPageSources(page);
                         
                         List<PageRequest> subPageRequests =
                             subPageSources.ConvertAll(
@@ -141,23 +141,23 @@
                                         return subPageRequest;
                                     });
 
-                        if (this.NewItemSourcesAvailable != null)
+                        if (NewItemSourcesAvailable != null)
                         {
-                            this.NewItemSourcesAvailable(itemSources);
+                            NewItemSourcesAvailable(itemSources);
                         }
 
-                        lock (this._requests)
+                        lock (_requests)
                         {
                             foreach (PageRequest subPageRequest in subPageRequests)
                             {
                             	string sourceText = subPageRequest.Source.OriginalString.ToLower();
-                                if (this._blockedSources.Contains(sourceText))
+                                if (_blockedSources.Contains(sourceText))
                                 {
                                     continue;
                                 }
 
-                                this._requests.Add(subPageRequest);
-                                this._blockedSources.Add(sourceText);
+                                _requests.Add(subPageRequest);
+                                _blockedSources.Add(sourceText);
                             }
                         }
                     }
@@ -172,7 +172,7 @@
         private List<Uri> ExtractSources(Page page, Regex tagRegex, Regex attributeRegex, Func<string, bool> onCheckSource = null)
         {
             var sources = new List<Uri>();
-            foreach (Match tagMatch in tagRegex.Matches(page.Conent))
+            foreach (Match tagMatch in tagRegex.Matches(page.Content))
             {
                 Match attributeMatch = attributeRegex.Match(tagMatch.Value);
                 if (attributeMatch.Groups.Count != 2)

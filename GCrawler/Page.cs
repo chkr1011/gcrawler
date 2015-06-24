@@ -1,32 +1,17 @@
-﻿namespace GCrawler
-{
-    using System;
+﻿using System;
 
+namespace GCrawler
+{
     internal sealed class Page
     {
-        private readonly Uri _source;
-        private readonly string _content;
-
         public Page(Uri source, string content)
         {
-            this._source = source;
-            this._content = content;
+            Source = source;
+            Content = content;
         }
 
-        public Uri Source
-        {
-            get
-            {
-                return this._source;
-            }
-        }
+        public Uri Source { get; private set; }
 
-        public string Conent
-        {
-            get
-            {
-                return this._content;
-            }
-        }
+        public string Content { get; private set; }
     }
 }

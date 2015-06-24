@@ -1,11 +1,11 @@
-﻿namespace GCrawler
-{
-    using System;
-    using System.IO;
-    using System.Linq;
-    using System.Security.Cryptography;
-    using System.Web;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Web;
 
+namespace GCrawler
+{
     internal static class ContentManager
     {
         private static readonly string ContentDirectory = AppDomain.CurrentDomain.BaseDirectory + "\\Content";
@@ -13,9 +13,9 @@
         
         static ContentManager()
         {
-            if (!Directory.Exists(ContentManager.ContentDirectory))
+            if (!Directory.Exists(ContentDirectory))
             {
-                Directory.CreateDirectory(ContentManager.ContentDirectory);
+                Directory.CreateDirectory(ContentDirectory);
                 Tracer.WriteInformation("Content directory created.");
             }
         }
@@ -26,9 +26,9 @@
             string base64Hash;
             using (FileStream fileStream = File.OpenRead(item.TempFilename))
             {
-                byte[] hash = ContentManager._shaCalculator.ComputeHash(fileStream);
+                byte[] hash = _shaCalculator.ComputeHash(fileStream);
                 base64Hash = Convert.ToBase64String(hash);
-                if (ContentManager.CheckHashIsInUse(base64Hash))
+                if (CheckHashIsInUse(base64Hash))
                 {
                     return;
                 }
@@ -42,7 +42,7 @@
                 filename = filename.Replace(invalidChar, '_');
             }
 
-            filename = Path.Combine(ContentManager.ContentDirectory, filename);
+            filename = Path.Combine(ContentDirectory, filename);
 
             try
             {
@@ -59,7 +59,7 @@
         private static bool CheckHashIsInUse(string base64Hash)
         {
             string pattern = string.Format("[{0}]*", base64Hash);
-            return Directory.GetFiles(ContentManager.ContentDirectory, pattern, SearchOption.TopDirectoryOnly).Any();
+            return Directory.GetFiles(ContentDirectory, pattern, SearchOption.TopDirectoryOnly).Any();
         }
     }
 }

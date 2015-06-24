@@ -1,10 +1,10 @@
-﻿namespace GCrawler
-{
-    using System;
+﻿using System;
 
+namespace GCrawler
+{
     internal static class Tracer
     {
-        private static readonly object _syncRoot = new object();
+        private static readonly object SyncRoot = new object();
 
         public static void Write(ConsoleColor color, string text, params object[] parameters)
         {
@@ -13,7 +13,7 @@
                 DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"), 
                 string.Format(text, parameters));
 
-            lock (Tracer._syncRoot)
+            lock (SyncRoot)
             {
                 Console.ForegroundColor = color;
                 Console.WriteLine(line);
@@ -22,22 +22,22 @@
 
         public static void WriteVerbose(string text, params object[] parameters)
         {
-            Tracer.Write(ConsoleColor.Gray, text, parameters);
+            Write(ConsoleColor.Gray, text, parameters);
         }
 
         public static void WriteHint(string text, params object[] parameters)
         {
-            Tracer.Write(ConsoleColor.DarkMagenta, text, parameters);
+            Write(ConsoleColor.DarkMagenta, text, parameters);
         }
 
         public static void WriteInformation(string text, params object[] parameters)
         {
-            Tracer.Write(ConsoleColor.DarkGreen, text, parameters);
+            Write(ConsoleColor.DarkGreen, text, parameters);
         }
 
         public static void WriteWarning(string text, params object[] parameters)
         {
-            Tracer.Write(ConsoleColor.DarkYellow, text, parameters);
+            Write(ConsoleColor.DarkYellow, text, parameters);
         }
     }
 }

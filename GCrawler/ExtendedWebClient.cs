@@ -1,8 +1,8 @@
-﻿namespace GCrawler
-{
-    using System;
-    using System.Net;
+﻿using System;
+using System.Net;
 
+namespace GCrawler
+{
     internal sealed class ExtendedWebClient : WebClient
     {
         private readonly CookieContainer _cookieContainer = new CookieContainer();
@@ -11,7 +11,7 @@
         {
             get
             {
-                return this._cookieContainer;
+                return _cookieContainer;
             }
         }
 
@@ -22,7 +22,7 @@
 
             if (webRequest != null)
             {
-                webRequest.CookieContainer = this._cookieContainer;
+                webRequest.CookieContainer = _cookieContainer;
             }
 
             return request;
